@@ -31,9 +31,15 @@ import com.tech.prjm09.dao.IDao;
 import com.tech.prjm09.dto.BDto;
 import com.tech.prjm09.dto.ReBrdimgDto;
 import com.tech.prjm09.service.BContentViewService;
+import com.tech.prjm09.service.BDeleteService;
+import com.tech.prjm09.service.BDownloadService;
 import com.tech.prjm09.service.BListService;
 import com.tech.prjm09.service.BModifyService;
+import com.tech.prjm09.service.BModifyViewService;
+import com.tech.prjm09.service.BReplyService;
+import com.tech.prjm09.service.BReplyViewService;
 import com.tech.prjm09.service.BServiceinter;
+import com.tech.prjm09.service.BWriteService;
 import com.tech.prjm09.util.DBCon;
 import com.tech.prjm09.util.SearchVO;
 
@@ -100,44 +106,9 @@ public class BController {
 			Model model) {
 		System.out.println("write() ctr");
 		
-		String bname=mtfRequest.getParameter("bname");
-		String btitle=mtfRequest.getParameter("btitle");
-		String bcontent=mtfRequest.getParameter("bcontent");
-		
-		System.out.println("title: "+btitle);
-		iDao.write(bname, btitle, bcontent);
-		
-		String workPath=System.getProperty("user.dir");
-		System.out.println(workPath);
-		
-//		String root="C:\\hsts2025\\sts25_work\\prjm29replyboard_mpsupdown_multi\\"
-//				+ "src\\main\\resources\\static\\files";
-		List<MultipartFile> fileList=mtfRequest.getFiles("file");
-		
-		String root=workPath+"\\src\\main\\resources\\static\\files";
-		int bid=iDao.selBid();
-		System.out.println("bid: "+bid);
-		
-		for(MultipartFile mf:fileList) {
-			String originalFile=mf.getOriginalFilename();
-			System.out.println("original files : "+originalFile);
-			long longtime=System.currentTimeMillis();
-			String changeFile=longtime+"_"+originalFile;
-			System.out.println("change files :"+changeFile);
-			
-			String pathfile=root+"\\"+changeFile;
-			try {
-				if(!originalFile.equals("")) {
-					mf.transferTo(new File(pathfile));
-					System.out.println("upload success~~");
-					//db기록
-					iDao.imgwrite(bid,originalFile,changeFile);
-					System.out.println("rebrdimgtb write sucess");
-				}
-			}catch(Exception e) {
-				e.printStackTrace();
-			}
-		}
+		model.addAttribute("mtfRequest",mtfRequest);
+		bServiceinter=new BWriteService(iDao);
+		bServiceinter.execute(model);
 		
 		return "redirect:list";
 	}
@@ -146,32 +117,13 @@ public class BController {
 	public String download(HttpServletRequest request,
 			HttpServletResponse response,
 			Model model) throws Exception {
-		String fname=request.getParameter("f");
+		
+		model.addAttribute("request",request);
+		model.addAttribute("response",response);
+		bServiceinter=new BDownloadService(iDao);
+		bServiceinter.execute(model);
 		String bid=request.getParameter("bid");
-		System.out.println(fname+":"+bid);
 		
-		//첨부파일
-		response.setHeader("Content-Disposition","Attachment;filename="+URLEncoder.encode(fname,"UTF-8"));
-		String workPath=System.getProperty("user.dir");
-		String realPath=workPath+"\\src\\main\\resources\\static\\files\\"+fname;
-		System.out.println(realPath);
-		FileInputStream fin=new FileInputStream(realPath);
-		ServletOutputStream sout=response.getOutputStream();
-		
-				
-		byte[] buf=new byte[1024];
-		int size=0;
-		while((size=fin.read(buf,0,1024))!=-1) {
-			sout.write(buf,0,size);
-		}
-		fin.close();
-		sout.close();
-		
-//		BDto dto=iDao.contentView(bid);
-//		model.addAttribute("")
-		//
-		//
-		//
 		return "content_view?bid="+bid;
 	}
 	
@@ -195,12 +147,10 @@ public class BController {
 			Model model) {
 		System.out.println("modify_view() ctr");
 		model.addAttribute("request",request);
-//		command=new BModifyViewCommand();
-//		command.execute(model);
-		String bid=request.getParameter("bid");
-		BDto dto=iDao.modifyView(bid);
 		
-		model.addAttribute("content_view",dto);
+		bServiceinter=new BModifyViewService(iDao);
+		bServiceinter.execute(model);
+		
 		return "modify_view";
 	}
 	@PostMapping("/modify")
@@ -219,13 +169,10 @@ public class BController {
 			Model model) {
 		System.out.println("reply_view() ctr");
 		
-//		model.addAttribute("request",request);
-//		command=new BReplyViewCommand();
-//		command.execute(model);
-		String bid=request.getParameter("bid");
-		BDto dto=iDao.replyView(bid);
-		
-		model.addAttribute("reply_view",dto);
+		model.addAttribute("request",request);
+		bServiceinter=new BReplyViewService(iDao);
+		bServiceinter.execute(model);
+	
 		return "reply_view";
 	}
 	@PostMapping("/reply")
@@ -236,19 +183,9 @@ public class BController {
 //		command=new BReplyCommand();
 //		command.execute(model);
 		
-		String bid=request.getParameter("bid");
-		String bname=request.getParameter("bname");
-		String btitle=request.getParameter("btitle");
-		String bcontent=request.getParameter("bcontent");
-		
-		String bgroup=request.getParameter("bgroup");
-		String bstep=request.getParameter("bstep");
-		String bindent=request.getParameter("bindent");
-		
-		iDao.replyShape(bgroup, bstep);
-		
-		iDao.reply(bid, bname, btitle, bcontent, bgroup, bstep, bindent);
-
+		model.addAttribute("request",request);
+		bServiceinter=new BReplyService(iDao);
+		bServiceinter.execute(model);
 		return "redirect:list";
 	}
 	
@@ -256,11 +193,11 @@ public class BController {
 	public String delete(HttpServletRequest request,
 			Model model) {
 		System.out.println("delete() ctr");
-//		model.addAttribute("request",request);
-//		command=new BDeleteCommand();
-//		command.execute(model);
-		String bid=request.getParameter("bid");
-		iDao.delete(bid);
+		
+		
+		model.addAttribute("request",request);
+		bServiceinter=new BDeleteService(iDao);
+		bServiceinter.execute(model);
 		return "redirect:list";
 	}
 	
