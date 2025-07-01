@@ -58,6 +58,7 @@ public class BController {
 //		command=new BListCommand();
 //		command.execute(model);
 		
+		//
 //		searching
 		String btitle="";
 		String bcontent="";
