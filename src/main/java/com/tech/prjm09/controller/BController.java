@@ -57,8 +57,7 @@ public class BController {
 		System.out.println("list() ctr");
 //		command=new BListCommand();
 //		command.execute(model);
-		
-		
+    
 //		
 		model.addAttribute("request",request);
 		model.addAttribute("searchVO",searchVO);
