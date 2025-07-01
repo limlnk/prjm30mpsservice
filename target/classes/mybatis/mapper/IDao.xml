@@ -94,7 +94,7 @@
     <update id="upHit">
     UPDATE REPLYBOARD 
 	SET BHIT=BHIT+1 
-	WHERE BID=${param1}
+	WHERE BID=#{param1}
     </update>
    
     
@@ -106,14 +106,14 @@
     </select>
     <update id="modify">
     UPDATE REPLYBOARD 
-	SET BNAME=${param2},BTITLE=${param3},BCONTENT=${param4} 
-	WHERE BID=${param1}
+	SET BNAME=#{param2},BTITLE=#{param3},BCONTENT=#{param4} 
+	WHERE BID=#{param1}
     </update>
     
     <select id="replyView">
     SELECT BID,BNAME,BTITLE,BCONTENT,
 	BDATE,BHIT,BGROUP,BSTEP,BINDENT 
-	FROM REPLYBOARD WHERE BID=#{PARAM1}
+	FROM REPLYBOARD WHERE BID=#{param1}
     </select>
     <insert id="reply">
     INSERT INTO REPLYBOARD(BID,BNAME,BTITLE,
@@ -125,7 +125,7 @@
 	WHERE BGROUP=#{param1} AND BSTEP>#{param2}
     </update>
     <delete id="delete">
-    DELETE FROM REPLYBOARD WHERE BID=${param1}
+    DELETE FROM REPLYBOARD WHERE BID=#{param1}
     </delete>
 
 
