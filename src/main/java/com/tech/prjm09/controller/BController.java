@@ -1,6 +1,8 @@
 package com.tech.prjm09.controller;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
@@ -28,12 +30,15 @@ import com.tech.command.BWriteCommand;
 import com.tech.prjm09.dao.IDao;
 import com.tech.prjm09.dto.BDto;
 import com.tech.prjm09.dto.ReBrdimgDto;
+import com.tech.prjm09.service.BContentViewService;
 import com.tech.prjm09.service.BListService;
 import com.tech.prjm09.service.BServiceinter;
 import com.tech.prjm09.util.DBCon;
 import com.tech.prjm09.util.SearchVO;
 
+import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import oracle.jdbc.proxy.annotation.Post;
 
 @Controller
@@ -135,23 +140,55 @@ public class BController {
 		
 		return "redirect:list";
 	}
+	
+	@RequestMapping("/download")
+	public String download(HttpServletRequest request,
+			HttpServletResponse response,
+			Model model) throws Exception {
+		String fname=request.getParameter("f");
+		String bid=request.getParameter("bid");
+		System.out.println(fname+":"+bid);
+		
+		//첨부파일
+		response.setHeader("Content-Disposition","Attachment;filename="+URLEncoder.encode(fname,"UTF-8"));
+		String workPath=System.getProperty("user.dir");
+		String realPath=workPath+"\\src\\main\\resources\\static\\files\\"+fname;
+		System.out.println(realPath);
+		FileInputStream fin=new FileInputStream(realPath);
+		ServletOutputStream sout=response.getOutputStream();
+		
+				
+		byte[] buf=new byte[1024];
+		int size=0;
+		while((size=fin.read(buf,0,1024))!=-1) {
+			sout.write(buf,0,size);
+		}
+		fin.close();
+		sout.close();
+		
+//		BDto dto=iDao.contentView(bid);
+//		model.addAttribute("")
+		//
+		//
+		//
+		return "content_view?bid="+bid;
+	}
+	
 	@RequestMapping("/content_view")
 	public String content_view(HttpServletRequest request,
 			Model model) {
 		System.out.println("content_view() ctr");
-//		model.addAttribute("request",request);
-//		command=new BContentCommand();
-//		command.execute(model);
-		String bid=request.getParameter("bid");
-		iDao.upHit(bid);
-		BDto dto=iDao.contentView(bid);
-//		
-		model.addAttribute("content_view",dto);
+
+		//model하고 service를 실행
+		model.addAttribute("request",request);
+		bServiceinter=new BContentViewService(iDao);
+		bServiceinter.execute(model);
 		
-		ArrayList<ReBrdimgDto> imgList=iDao.selectImg(bid);
-		model.addAttribute("imgList",imgList);
+		
 		return "content_view";
 	}
+
+	
 	@RequestMapping("/modify_view")
 	public String modify_view(HttpServletRequest request,
 			Model model) {

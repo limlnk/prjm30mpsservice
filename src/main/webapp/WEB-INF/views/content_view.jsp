@@ -34,7 +34,7 @@
 		<td>첨부</td>
 		<td>
 		<c:forEach items="${imgList }" var="imgdto">
-			${imgdto.rebchgfile } <br />
+			<a href="download?f=${imgdto.rebchgfile }&bid=${content_view.bid }">${imgdto.rebchgfile }</a> <br />
 		</c:forEach>
 		</td>
 	</tr>
