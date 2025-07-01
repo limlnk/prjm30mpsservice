@@ -21,8 +21,10 @@ public interface IDao {
 	public void imgwrite(int bid,String originFile,String changeFile);
 
 	public ArrayList<ReBrdimgDto> selectImg(String bid);
+	
 	public BDto contentView(String sbid);
 	public void upHit(String sbid);
+	
 	public BDto modifyView(String sbid);
 	public void modify(String bid,String bname,
 			String btitle,String bcontent);
