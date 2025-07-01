@@ -60,6 +60,7 @@ public class BController {
 		
 		//
 //		searching
+		//
 		String btitle="";
 		String bcontent="";
 		
